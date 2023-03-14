@@ -24,13 +24,7 @@ import androidx.lifecycle.lifecycleScope
 import com.arcgismaps.ApiKey
 import com.arcgismaps.ArcGISEnvironment
 import com.arcgismaps.Color
-import com.arcgismaps.geometry.MutablePart
-import com.arcgismaps.geometry.Part
-import com.arcgismaps.geometry.Point
-import com.arcgismaps.geometry.Polygon
-import com.arcgismaps.geometry.PolygonBuilder
-import com.arcgismaps.geometry.PolylineBuilder
-import com.arcgismaps.geometry.SpatialReference
+import com.arcgismaps.geometry.*
 import com.arcgismaps.mapping.ArcGISMap
 import com.arcgismaps.mapping.BasemapStyle
 import com.arcgismaps.mapping.symbology.SimpleFillSymbol
@@ -76,6 +70,11 @@ class MainActivity : AppCompatActivity() {
     private lateinit var inputPolygon2: Polygon
     private lateinit var inputPolygon3: Polygon
 
+    // the two polygons for perform spatial operations
+    private lateinit var inputPolyline1: Polyline
+    private lateinit var inputPolyline2: Polyline
+    private lateinit var inputPolyline3: Polyline
+
     override fun onCreate(savedInstanceState: Bundle?) {
         super.onCreate(savedInstanceState)
 
@@ -93,12 +92,19 @@ class MainActivity : AppCompatActivity() {
             graphicsOverlays.add(inputGeometryGraphicsOverlay)
         }
 
+        val startPoint = Point(-13431214.44, 5131066.25, SpatialReference.webMercator())
+
+        lifecycleScope.launch {
+            // set viewpoint of map view to starting point and scale
+            mapView.setViewpointCenter(startPoint, 4500.0)
+        }
+
         //create the graphic
         river()
 
-//        val riverGraphic = Graphic(river(), lineSymbol)
-//        //add to the graphic overlay
-//        inputGeometryGraphicsOverlay.graphics.add(riverGraphic)
+        val riverGraphic = Graphic(river(), lineSymbol)
+        //add to the graphic overlay
+        inputGeometryGraphicsOverlay.graphics.add(riverGraphic)
 
         // create input polygons and add graphics to display these polygons in an overlay
 //        createPolygons()
@@ -110,12 +116,6 @@ class MainActivity : AppCompatActivity() {
 //            mapView.setViewpointCenter(startPoint, 5000000.0)
 //        }
 
-        val startPoint = Point(-13431214.44, 5131066.25, SpatialReference.webMercator())
-
-        lifecycleScope.launch {
-            // set viewpoint of map view to starting point and scale
-            mapView.setViewpointCenter(startPoint, 4500.0)
-        }
     }
 
     private fun river() {
@@ -133,6 +133,11 @@ class MainActivity : AppCompatActivity() {
             addPoint(Point(-13431245.44, 5131040.25))
         }
 
+        inputPolyline1 = polylineBuilder1.toGeometry()
+
+
+        inputGeometryGraphicsOverlay.graphics.add(Graphic(inputPolyline1, lineSymbol))
+
         val polylineBuilder2 = PolylineBuilder(SpatialReference.webMercator()) {
             // create and add points to the point collection
             addPoint(Point(-13431250.44, 5131030.25))
@@ -146,6 +151,9 @@ class MainActivity : AppCompatActivity() {
             addPoint(Point(-13431370.44, 5130950.25))
         }
 
+        inputPolyline2 = polylineBuilder2.toGeometry()
+        inputGeometryGraphicsOverlay.graphics.add(Graphic(inputPolyline2, lineSymbol))
+
         val polylineBuilder3 = PolylineBuilder(SpatialReference.webMercator()) {
             // create and add points to the point collection
             addPoint(Point(-13431400.44, 5130940.25))
@@ -153,6 +161,9 @@ class MainActivity : AppCompatActivity() {
             addPoint(Point(-13431440.44, 5130920.25))
             addPoint(Point(-13431480.44, 5130910.25))
         }
+
+        inputPolyline3 = polylineBuilder3.toGeometry()
+        inputGeometryGraphicsOverlay.graphics.add(Graphic(inputPolyline3, lineSymbol))
 
     }
 
