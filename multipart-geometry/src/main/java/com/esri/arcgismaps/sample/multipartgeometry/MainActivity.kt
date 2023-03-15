@@ -102,9 +102,9 @@ class MainActivity : AppCompatActivity() {
         //create the graphic
         river()
 
-        val riverGraphic = Graphic(river(), lineSymbol)
-        //add to the graphic overlay
-        inputGeometryGraphicsOverlay.graphics.add(riverGraphic)
+//        val riverGraphic = Graphic(river(), lineSymbol)
+//        //add to the graphic overlay
+//        inputGeometryGraphicsOverlay.graphics.add(riverGraphic)
 
         // create input polygons and add graphics to display these polygons in an overlay
 //        createPolygons()
