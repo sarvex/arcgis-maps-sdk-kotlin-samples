@@ -100,14 +100,14 @@ class MainActivity : AppCompatActivity() {
         }
 
         //create the graphic
-        river()
+//        river()
 
 //        val riverGraphic = Graphic(river(), lineSymbol)
 //        //add to the graphic overlay
 //        inputGeometryGraphicsOverlay.graphics.add(riverGraphic)
 
         // create input polygons and add graphics to display these polygons in an overlay
-//        createPolygons()
+        createPolygons()
 
 //        val startPoint = Point(-16924906.559, 1765424.315, SpatialReference.webMercator())
 //
