@@ -18,7 +18,6 @@ package com.esri.arcgismaps.sample.navigateroutewithrerouting
 
 import android.os.Bundle
 import android.speech.tts.TextToSpeech
-import android.text.format.DateUtils
 import android.util.Log
 import android.widget.Button
 import android.widget.TextView
@@ -33,7 +32,6 @@ import com.arcgismaps.geometry.Point
 import com.arcgismaps.geometry.Polyline
 import com.arcgismaps.geometry.SpatialReference
 import com.arcgismaps.location.LocationDisplayAutoPanMode
-import com.arcgismaps.location.RouteTrackerLocationDataSource
 import com.arcgismaps.location.SimulatedLocationDataSource
 import com.arcgismaps.location.SimulationParameters
 import com.arcgismaps.mapping.ArcGISMap
@@ -44,7 +42,6 @@ import com.arcgismaps.mapping.symbology.SimpleMarkerSymbol
 import com.arcgismaps.mapping.symbology.SimpleMarkerSymbolStyle
 import com.arcgismaps.mapping.view.Graphic
 import com.arcgismaps.mapping.view.GraphicsOverlay
-import com.arcgismaps.mapping.view.LocationDisplay
 import com.arcgismaps.mapping.view.MapView
 import com.arcgismaps.navigation.*
 import com.arcgismaps.tasks.networkanalysis.*
@@ -54,6 +51,7 @@ import kotlinx.coroutines.launch
 import java.io.File
 import java.time.Instant
 import java.util.*
+import java.util.concurrent.atomic.AtomicBoolean
 import kotlin.math.roundToInt
 
 class MainActivity : AppCompatActivity() {
@@ -112,6 +110,9 @@ class MainActivity : AppCompatActivity() {
     private var routeTraveledGraphic: Graphic = Graphic()
 
     private var textToSpeech: TextToSpeech? = null
+
+    // boolean to check if Android text-speech is initialized
+    private var isTextToSpeechInitialized = AtomicBoolean(false)
 
     // the JSON of polylines of the path for the simulated data source
     private val polylineJSON =
@@ -174,10 +175,14 @@ class MainActivity : AppCompatActivity() {
         // display the route overview status message
         statusMessageTV.text = getString(R.string.route_overview)
 
-        // set up Android text to speech engine
-        textToSpeech = TextToSpeech(this) {
-            textToSpeech?.language = Locale.ENGLISH
+        // create text-to-speech to replay navigation voice guidance
+        textToSpeech = TextToSpeech(this) { status ->
+            if (status != TextToSpeech.ERROR) {
+                textToSpeech?.language = resources.configuration.locales[0]
+                isTextToSpeechInitialized.set(true)
+            }
         }
+
 
         // create a route task using the San Diego geodatabase file
         routeTask = RouteTask("$provisionPath/sandiego.geodatabase", "Streets_ND")
@@ -210,13 +215,13 @@ class MainActivity : AppCompatActivity() {
             name = "RH Fleet Aerospace Museum"
         }
         // assign the stops to the route parameters
-        routeParameters?.setStops(mutableListOf(startingStop, destinationStop))
+        routeParameters.setStops(mutableListOf(startingStop, destinationStop))
         // get the route results future
-        val routeResult = routeTask.solveRoute(routeParameters!!).getOrElse {
+        val routeResult = routeTask.solveRoute(routeParameters).getOrElse {
             return showError("Error solving route:${it.message}")
         }
         // keep an instance of the loaded route
-        route = routeResult?.routes?.get(0)
+        route = routeResult.routes[0]
         // set start and stop points to a blue diamond symbol
         val stopSymbol = SimpleMarkerSymbol(
             SimpleMarkerSymbolStyle.Diamond,
@@ -278,7 +283,10 @@ class MainActivity : AppCompatActivity() {
         route?.directionManeuvers?.let { directionManeuvers.addAll(it) }
 
         // create a route tracker using the route result
-        routeTracker = routeResult?.let { RouteTracker(it, 0, true) }
+        routeTracker = RouteTracker(routeResult, 0, true).apply {
+            isSpeechEngineReady =
+                { isTextToSpeechInitialized.get() && textToSpeech?.isSpeaking == false }
+        }
 
         // plays the direction voice guidance
         lifecycleScope.launch {
@@ -345,22 +353,12 @@ class MainActivity : AppCompatActivity() {
             // start the location data source
             mapView.locationDisplay.dataSource.start()
 
-            // remove the current route tracking status listener if new route loading has started.
-            lifecycleScope.launch {
-                routeTracker?.rerouteStarted?.collect {
-                    // remove current route tracker event listeners when calculating a new route
-                    //routeTracker?.removeTrackingStatusChangedListener(trackingStatusListener)
-                    //routeTracker?.removeNewVoiceGuidanceListener(speakDirectionListener)
-                }
-            }
-
             lifecycleScope.launch {
                 routeTracker?.rerouteCompleted?.collect { trackingStatusResult ->
                     val trackingStatus = trackingStatusResult.getOrElse {
                         return@collect showError("Error retrieving tacking status")
                     }
 
-                    //routeTracker?.removeTrackingStatusChangedListener(trackingStatusListener)
                     // clear current direction maneuvers
                     directionManeuvers.clear()
                     // adds new direction maneuvers to the list
@@ -411,14 +409,14 @@ class MainActivity : AppCompatActivity() {
                     )
                 }
                 // set geometries for progress and the remaining route
-                routeAheadGraphic?.geometry = status.routeProgress.remainingGeometry
-                routeTraveledGraphic?.geometry = status.routeProgress.traversedGeometry
+                routeAheadGraphic.geometry = status.routeProgress.remainingGeometry
+                routeTraveledGraphic.geometry = status.routeProgress.traversedGeometry
             } else if (status.destinationStatus == DestinationStatus.Reached) {
                 // update the status message
                 statusMessage.appendLine("Destination reached")
                 // set the route geometries to reflect the completed route
-                routeAheadGraphic?.geometry = null
-                routeTraveledGraphic?.geometry = status.routeResult.routes[0].routeGeometry
+                routeAheadGraphic.geometry = null
+                routeTraveledGraphic.geometry = status.routeResult.routes[0].routeGeometry
             }
         } else {
             statusMessage.appendLine("Off route, rerouting...")
@@ -439,8 +437,6 @@ class MainActivity : AppCompatActivity() {
         routeTracker.newVoiceGuidance.collect { voiceGuidance ->
             // use Android's text to speech to speak the voice guidance
             textToSpeech?.speak(voiceGuidance.text, TextToSpeech.QUEUE_FLUSH, null, null)
-            // set next direction text
-            //nextDirectionTextView.text = getString(R.string.next_direction, voiceGuidance.text)
         }
     }
 
