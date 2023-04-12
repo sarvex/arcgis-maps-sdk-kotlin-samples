@@ -92,27 +92,27 @@ class MainActivity : AppCompatActivity() {
             graphicsOverlays.add(inputGeometryGraphicsOverlay)
         }
 
-//        // viewpoint for polygon
-//        val startPoint = Point(-16924906.559, 1765424.315, SpatialReference.webMercator())
-//
-//        lifecycleScope.launch {
-//            // set viewpoint of map view to starting point and scale
-//            mapView.setViewpointCenter(startPoint, 5000000.0)
-//        }
-
-        // create input polygons and add graphics to display these polygons in an overlay
-//        createPolygons()
-
-        // viewpoint for river
-        val startPoint = Point(-13431214.44, 5131066.25, SpatialReference.webMercator())
+        // viewpoint for polygon
+        val startPoint = Point(-16924906.559, 1765424.315, SpatialReference.webMercator())
 
         lifecycleScope.launch {
             // set viewpoint of map view to starting point and scale
-            mapView.setViewpointCenter(startPoint, 4500.0)
+            mapView.setViewpointCenter(startPoint, 5000000.0)
         }
 
-        //create the graphic
-        river()
+         //create input polygons and add graphics to display these polygons in an overlay
+        createPolygons()
+
+//        // viewpoint for river
+//        val startPoint = Point(-13431214.44, 5131066.25, SpatialReference.webMercator())
+//
+//        lifecycleScope.launch {
+//            // set viewpoint of map view to starting point and scale
+//            mapView.setViewpointCenter(startPoint, 4500.0)
+//        }
+//
+//        //create the graphic
+//        river()
     }
 
 
@@ -195,9 +195,7 @@ class MainActivity : AppCompatActivity() {
 
     private fun river() {
         // create river polyline 1
-        val part1 = MutablePart.createWithSegments(
-            listOf(
-                Segment()
+        val polylineBuilder1 = PolylineBuilder(SpatialReference.webMercator()) {
             // create and add points to the point collection
             addPoint(Point(-13431205.44, 5131075.25))
             addPoint(Point(-13431210.44, 5131072.25))
@@ -208,9 +206,7 @@ class MainActivity : AppCompatActivity() {
             addPoint(Point(-13431235.44, 5131050.25))
             addPoint(Point(-13431240.44, 5131045.25))
             addPoint(Point(-13431245.44, 5131040.25))
-            ),
-            SpatialReference.webMercator()
-        )
+        }
 
 
         inputPolyline1 = polylineBuilder1.toGeometry()
