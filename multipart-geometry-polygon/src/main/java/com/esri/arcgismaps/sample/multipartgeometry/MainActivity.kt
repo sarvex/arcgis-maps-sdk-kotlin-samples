@@ -17,14 +17,16 @@
 package com.esri.arcgismaps.sample.multipartgeometrypolygon
 
 import android.os.Bundle
-import android.util.Log
 import androidx.appcompat.app.AppCompatActivity
 import androidx.databinding.DataBindingUtil
 import androidx.lifecycle.lifecycleScope
 import com.arcgismaps.ApiKey
 import com.arcgismaps.ArcGISEnvironment
 import com.arcgismaps.Color
-import com.arcgismaps.geometry.*
+import com.arcgismaps.geometry.MutablePart
+import com.arcgismaps.geometry.Point
+import com.arcgismaps.geometry.PolygonBuilder
+import com.arcgismaps.geometry.SpatialReference
 import com.arcgismaps.mapping.ArcGISMap
 import com.arcgismaps.mapping.BasemapStyle
 import com.arcgismaps.mapping.symbology.SimpleFillSymbol
@@ -79,7 +81,7 @@ class MainActivity : AppCompatActivity() {
             mapView.setViewpointCenter(startPoint, 5000000.0)
         }
 
-         //create input polygons and add graphics to display these polygons in an overlay
+        //create input polygons and add graphics to display these polygons in an overlay
         createPolygons()
     }
 
@@ -138,7 +140,7 @@ class MainActivity : AppCompatActivity() {
         )
 
         // inner ring
-        val innerLake= MutablePart.createWithPoints(
+        val innerLake = MutablePart.createWithPoints(
             listOf(
                 // add points to the point collection
                 Point(-16895378.882, 1773374.994),

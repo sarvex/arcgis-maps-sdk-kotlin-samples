@@ -17,24 +17,23 @@
 package com.esri.arcgismaps.sample.multipartgeometrypolyline
 
 import android.os.Bundle
-import android.util.Log
 import androidx.appcompat.app.AppCompatActivity
 import androidx.databinding.DataBindingUtil
 import androidx.lifecycle.lifecycleScope
 import com.arcgismaps.ApiKey
 import com.arcgismaps.ArcGISEnvironment
 import com.arcgismaps.Color
-import com.arcgismaps.geometry.*
+import com.arcgismaps.geometry.Point
+import com.arcgismaps.geometry.Polyline
+import com.arcgismaps.geometry.PolylineBuilder
+import com.arcgismaps.geometry.SpatialReference
 import com.arcgismaps.mapping.ArcGISMap
 import com.arcgismaps.mapping.BasemapStyle
-import com.arcgismaps.mapping.symbology.SimpleFillSymbol
-import com.arcgismaps.mapping.symbology.SimpleFillSymbolStyle
 import com.arcgismaps.mapping.symbology.SimpleLineSymbol
 import com.arcgismaps.mapping.symbology.SimpleLineSymbolStyle
 import com.arcgismaps.mapping.view.Graphic
 import com.arcgismaps.mapping.view.GraphicsOverlay
 import com.esri.arcgismaps.sample.multipartgeometrypolyline.databinding.ActivityMainBinding
-import com.google.android.material.snackbar.Snackbar
 import kotlinx.coroutines.launch
 
 private val Color.Companion.blue: Color
@@ -86,9 +85,9 @@ class MainActivity : AppCompatActivity() {
 
     private fun river() {
         // the two polygons for perform spatial operations
-         var inputPolyline1: Polyline
-         var inputPolyline2: Polyline
-         var inputPolyline3: Polyline
+        var inputPolyline1: Polyline
+        var inputPolyline2: Polyline
+        var inputPolyline3: Polyline
 
         // create river polyline 1
         val polylineBuilder1 = PolylineBuilder(SpatialReference.webMercator()) {
