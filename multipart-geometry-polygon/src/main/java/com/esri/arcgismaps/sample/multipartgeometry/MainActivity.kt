@@ -14,7 +14,7 @@
  *
  */
 
-package com.esri.arcgismaps.sample.multipartgeometry
+package com.esri.arcgismaps.sample.multipartgeometrypolygon
 
 import android.os.Bundle
 import android.util.Log
@@ -33,8 +33,7 @@ import com.arcgismaps.mapping.symbology.SimpleLineSymbol
 import com.arcgismaps.mapping.symbology.SimpleLineSymbolStyle
 import com.arcgismaps.mapping.view.Graphic
 import com.arcgismaps.mapping.view.GraphicsOverlay
-import com.esri.arcgismaps.sample.multipartgeometry.databinding.ActivityMainBinding
-import com.google.android.material.snackbar.Snackbar
+import com.esri.arcgismaps.sample.multipartgeometrypolygon.databinding.ActivityMainBinding
 import kotlinx.coroutines.launch
 
 private val Color.Companion.blue: Color
@@ -43,8 +42,6 @@ private val Color.Companion.blue: Color
     }
 
 class MainActivity : AppCompatActivity() {
-
-    private val TAG = MainActivity::class.java.simpleName
 
     // set up data binding for the activity
     private val activityMainBinding: ActivityMainBinding by lazy {
@@ -56,24 +53,7 @@ class MainActivity : AppCompatActivity() {
     }
 
     // create the graphic overlays
-    private val inputGeometryGraphicsOverlay: GraphicsOverlay by lazy { GraphicsOverlay() }
-
-//    // simple black line symbol for outlines
-//    private val lineSymbol = SimpleLineSymbol(SimpleLineSymbolStyle.Solid, Color.black, 1f)
-
-    //define a line symbol
-    val lineSymbol = SimpleLineSymbol(SimpleLineSymbolStyle.Solid, Color.blue, 2f)
-
-
-    // the two polygons for perform spatial operations
-    private lateinit var inputPolygon1: Polygon
-    private lateinit var inputPolygon2: Polygon
-    private lateinit var inputPolygon3: Polygon
-
-    // the two polygons for perform spatial operations
-    private lateinit var inputPolyline1: Polyline
-    private lateinit var inputPolyline2: Polyline
-    private lateinit var inputPolyline3: Polyline
+    private val graphicsOverlay: GraphicsOverlay by lazy { GraphicsOverlay() }
 
     override fun onCreate(savedInstanceState: Bundle?) {
         super.onCreate(savedInstanceState)
@@ -83,13 +63,12 @@ class MainActivity : AppCompatActivity() {
         ArcGISEnvironment.apiKey = ApiKey.create(BuildConfig.API_KEY)
         lifecycle.addObserver(mapView)
 
-
         // set up the MapView
         mapView.apply {
             // create an ArcGISMap with a light gray basemap
             map = ArcGISMap(BasemapStyle.ArcGISTerrain)
             // create graphics overlays to show the inputs and results of the spatial operation
-            graphicsOverlays.add(inputGeometryGraphicsOverlay)
+            graphicsOverlays.add(graphicsOverlay)
         }
 
         // viewpoint for polygon
@@ -102,24 +81,12 @@ class MainActivity : AppCompatActivity() {
 
          //create input polygons and add graphics to display these polygons in an overlay
         createPolygons()
-
-//        // viewpoint for river
-//        val startPoint = Point(-13431214.44, 5131066.25, SpatialReference.webMercator())
-//
-//        lifecycleScope.launch {
-//            // set viewpoint of map view to starting point and scale
-//            mapView.setViewpointCenter(startPoint, 4500.0)
-//        }
-//
-//        //create the graphic
-//        river()
     }
-
 
     private fun createPolygons() {
 
         // create input polygon 1
-        val part1 = MutablePart.createWithPoints(
+        val island1 = MutablePart.createWithPoints(
             listOf(
                 // add points to the point collection
                 Point(-16983394.627, 1725046.488),
@@ -136,7 +103,7 @@ class MainActivity : AppCompatActivity() {
         )
 
         // create input polygon 2
-        val part2 = MutablePart.createWithPoints(
+        val island2 = MutablePart.createWithPoints(
             listOf(
                 // add points to the point collection
                 Point(-16858450.243, 1742851.240),
@@ -153,7 +120,7 @@ class MainActivity : AppCompatActivity() {
         )
 
         // outer ring
-        val part3outerRing = MutablePart.createWithPoints(
+        val outerIsland = MutablePart.createWithPoints(
             listOf(
                 // add points to the point collection
                 Point(-16894265.768, 1780130.116),
@@ -171,7 +138,7 @@ class MainActivity : AppCompatActivity() {
         )
 
         // inner ring
-        val part3innerRing = MutablePart.createWithPoints(
+        val innerLake= MutablePart.createWithPoints(
             listOf(
                 // add points to the point collection
                 Point(-16895378.882, 1773374.994),
@@ -183,63 +150,16 @@ class MainActivity : AppCompatActivity() {
             SpatialReference.webMercator()
         )
 
-        var parts = listOf(part1, part2, part3outerRing, part3innerRing)
+        var parts = listOf(island1, island2, outerIsland, innerLake)
 
         var polygonBuilder = PolygonBuilder(parts)
 
+        //define a line symbol
+        val lineSymbol = SimpleLineSymbol(SimpleLineSymbolStyle.Solid, Color.blue, 2f)
+
         // create and add a green graphic to show input polygon 2
         val greenFill = SimpleFillSymbol(SimpleFillSymbolStyle.Solid, Color.green, lineSymbol)
-        inputGeometryGraphicsOverlay.graphics.add(Graphic(polygonBuilder.toGeometry(), greenFill))
-
-    }
-
-    private fun river() {
-        // create river polyline 1
-        val polylineBuilder1 = PolylineBuilder(SpatialReference.webMercator()) {
-            // create and add points to the point collection
-            addPoint(Point(-13431205.44, 5131075.25))
-            addPoint(Point(-13431210.44, 5131072.25))
-            addPoint(Point(-13431215.44, 5131070.25))
-            addPoint(Point(-13431220.44, 5131065.25))
-            addPoint(Point(-13431225.44, 5131060.25))
-            addPoint(Point(-13431230.44, 5131055.25))
-            addPoint(Point(-13431235.44, 5131050.25))
-            addPoint(Point(-13431240.44, 5131045.25))
-            addPoint(Point(-13431245.44, 5131040.25))
-        }
-
-
-        inputPolyline1 = polylineBuilder1.toGeometry()
-
-
-        inputGeometryGraphicsOverlay.graphics.add(Graphic(inputPolyline1, lineSymbol))
-
-        val polylineBuilder2 = PolylineBuilder(SpatialReference.webMercator()) {
-            // create and add points to the point collection
-            addPoint(Point(-13431250.44, 5131030.25))
-            addPoint(Point(-13431260.44, 5131020.25))
-            addPoint(Point(-13431270.44, 5131010.25))
-            addPoint(Point(-13431280.44, 5131000.25))
-            addPoint(Point(-13431290.44, 5130999.25))
-            addPoint(Point(-13431300.44, 5130980.25))
-            addPoint(Point(-13431330.44, 5130970.25))
-            addPoint(Point(-13431350.44, 5130960.25))
-            addPoint(Point(-13431370.44, 5130950.25))
-        }
-
-        inputPolyline2 = polylineBuilder2.toGeometry()
-        inputGeometryGraphicsOverlay.graphics.add(Graphic(inputPolyline2, lineSymbol))
-
-        val polylineBuilder3 = PolylineBuilder(SpatialReference.webMercator()) {
-            // create and add points to the point collection
-            addPoint(Point(-13431400.44, 5130940.25))
-            addPoint(Point(-13431420.44, 5130930.25))
-            addPoint(Point(-13431440.44, 5130920.25))
-            addPoint(Point(-13431480.44, 5130910.25))
-        }
-
-        inputPolyline3 = polylineBuilder3.toGeometry()
-        inputGeometryGraphicsOverlay.graphics.add(Graphic(inputPolyline3, lineSymbol))
+        graphicsOverlay.graphics.add(Graphic(polygonBuilder.toGeometry(), greenFill))
 
     }
 }
