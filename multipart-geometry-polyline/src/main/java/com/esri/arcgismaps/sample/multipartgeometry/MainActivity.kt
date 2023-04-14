@@ -160,14 +160,15 @@ class MainActivity : AppCompatActivity() {
         // add all the parts created above to a List
         var parts = listOf(riverstream1, riverstream2, riverstream3, riverstream4, riverstream5)
 
-        // Create a PolygonBuilder using the list of parts created above
+        // Create a Polyline geometry using the list of parts created above. This Polyline Builder is essentially a MultipartPolyline geometry comprising of the
+        // river streams which are ultimately part of a main river which connects to the ocean
         var polylineBuilder = PolylineBuilder(parts)
 
-        // define a line symbol which will represent the boundary of the polygon
-        val lineSymbol = SimpleLineSymbol(SimpleLineSymbolStyle.Solid, Color.blue, 4f)
+        // define a line symbol which will represent the river stream with its width defined.
+        val riverSymbol = SimpleLineSymbol(SimpleLineSymbolStyle.Solid, Color.blue, 4f)
 
-        // create and add a green graphic to fill color of the Polygon Builder.
-        graphicsOverlay.graphics.add(Graphic(polylineBuilder.toGeometry(), lineSymbol))
+        // create a Graphic using the polyline geometry and the riverSymbol and add it to the GraphicsOverlay
+        graphicsOverlay.graphics.add(Graphic(polylineBuilder.toGeometry(), riverSymbol))
 
     }
 }
