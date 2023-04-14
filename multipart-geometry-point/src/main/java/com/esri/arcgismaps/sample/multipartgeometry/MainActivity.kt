@@ -25,15 +25,12 @@ import androidx.lifecycle.lifecycleScope
 import com.arcgismaps.ApiKey
 import com.arcgismaps.ArcGISEnvironment
 import com.arcgismaps.Color
+import com.arcgismaps.geometry.Multipoint
 import com.arcgismaps.geometry.Point
-import com.arcgismaps.geometry.Polyline
-import com.arcgismaps.geometry.PolylineBuilder
 import com.arcgismaps.geometry.SpatialReference
 import com.arcgismaps.mapping.ArcGISMap
 import com.arcgismaps.mapping.BasemapStyle
 import com.arcgismaps.mapping.symbology.PictureMarkerSymbol
-import com.arcgismaps.mapping.symbology.SimpleLineSymbol
-import com.arcgismaps.mapping.symbology.SimpleLineSymbolStyle
 import com.arcgismaps.mapping.view.Graphic
 import com.arcgismaps.mapping.view.GraphicsOverlay
 import com.esri.arcgismaps.sample.multipartgeometrypoint.databinding.ActivityMainBinding
@@ -82,30 +79,29 @@ class MainActivity : AppCompatActivity() {
             mapView.setViewpointCenter(startPoint, 3500.0)
         }
 
-        //create the graphic
+        val multipoint = Multipoint(
+            listOf(
+                Point(-13431214.195681, 5131066.057930),
+                Point(-13431220.44, 5131172.25),
+                Point(-13431385.44, 5131040.25),
+                Point(-13431435.44, 5131260.25),
+                Point(-13431320.44, 5131145.25),
+                Point(-13431420.44, 5131125.25),
+                Point(-13431260.44, 5131095.25),
+                Point(-13431320.44, 5131055.25),
+                Point(-13431295.44, 5131330.25),
+                Point(-13431465.44, 5131180.25),
+                Point(-13431260.44, 5131265.25),
+                Point(-13431380.44, 5131195.25),
+            ),
+            SpatialReference.webMercator()
+        )
         lifecycleScope.launch {
-            forest(-13431214.195681, 5131066.057930)
-            forest(-13431220.44, 5131172.25)
-            forest(-13431385.44, 5131040.25)
-            forest(-13431435.44, 5131260.25)
-            forest(-13431320.44, 5131145.25)
-            forest(-13431420.44, 5131125.25)
-            forest(-13431260.44, 5131095.25)
-            forest(-13431320.44, 5131055.25)
-            forest(-13431295.44, 5131330.25)
-            forest(-13431465.44, 5131180.25)
-            forest(-13431260.44, 5131265.25)
-            forest(-13431380.44, 5131195.25)
-
+            val treeSymbol = createPinSymbol()
+            val treeGraphic =
+                Graphic(multipoint, treeSymbol) // creates a graphic with the tree point and symbol
+            graphicsOverlay.graphics.add(treeGraphic)
         }
-
-    }
-
-    private suspend fun forest(x: Double, y:Double) {
-        val treeSymbol =  createPinSymbol()
-        val treePoint = Point(x, y) // creates a point geometry for the location of the tree
-        val treeGraphic = Graphic(treePoint, treeSymbol) // creates a graphic with the tree point and symbol
-        graphicsOverlay.graphics.add(treeGraphic)
     }
 
     private suspend fun createPinSymbol(): PictureMarkerSymbol {
