@@ -52,7 +52,7 @@ class MainActivity : AppCompatActivity() {
         activityMainBinding.mapView
     }
 
-    // create the graphic overlays
+    // create the graphic overlay
     private val graphicsOverlay: GraphicsOverlay by lazy { GraphicsOverlay() }
 
     override fun onCreate(savedInstanceState: Bundle?) {
@@ -65,13 +65,13 @@ class MainActivity : AppCompatActivity() {
 
         // set up the MapView
         mapView.apply {
-            // create an ArcGISMap with a light gray basemap
+            // create an ArcGISMap with a streets basemap
             map = ArcGISMap(BasemapStyle.ArcGISStreets)
             // create graphics overlays to show the inputs and results of the spatial operation
             graphicsOverlays.add(graphicsOverlay)
         }
 
-        // viewpoint for river
+        // create a viewpoint
         val startPoint = Point(-13431350.44, 5131196.25, SpatialReference.webMercator())
 
         lifecycleScope.launch {
@@ -79,6 +79,7 @@ class MainActivity : AppCompatActivity() {
             mapView.setViewpointCenter(startPoint, 3500.0)
         }
 
+        // Create Multipoint geometry using collection of points representing each individual tree
         val multipoint = Multipoint(
             listOf(
                 Point(-13431214.195681, 5131066.057930),
@@ -97,13 +98,16 @@ class MainActivity : AppCompatActivity() {
             SpatialReference.webMercator()
         )
         lifecycleScope.launch {
+            // create a tree symbol
             val treeSymbol = createPinSymbol()
+            // creates a graphic with the tree point and symbol
             val treeGraphic =
-                Graphic(multipoint, treeSymbol) // creates a graphic with the tree point and symbol
+                Graphic(multipoint, treeSymbol)
             graphicsOverlay.graphics.add(treeGraphic)
         }
     }
 
+    // Create a tree symbol which is a PictureMarkerSymbol
     private suspend fun createPinSymbol(): PictureMarkerSymbol {
         val pinDrawable = ContextCompat.getDrawable(this, R.drawable.tree) as BitmapDrawable
         val pinSymbol = PictureMarkerSymbol(pinDrawable)

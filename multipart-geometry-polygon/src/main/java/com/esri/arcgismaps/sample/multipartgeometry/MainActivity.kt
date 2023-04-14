@@ -87,7 +87,7 @@ class MainActivity : AppCompatActivity() {
 
     private fun createPolygons() {
 
-        // create input polygon 1
+        // create an island which is the first polygon part
         val island1 = MutablePart.createWithPoints(
             listOf(
                 // add points to the point collection
@@ -104,7 +104,7 @@ class MainActivity : AppCompatActivity() {
             SpatialReference.webMercator()
         )
 
-        // create input polygon 2
+        // create a another island which is the second polygon part
         val island2 = MutablePart.createWithPoints(
             listOf(
                 // add points to the point collection
@@ -121,7 +121,7 @@ class MainActivity : AppCompatActivity() {
             SpatialReference.webMercator()
         )
 
-        // outer ring
+        // create a another island which is the third polygon part and acts as an outer ring
         val outerIsland = MutablePart.createWithPoints(
             listOf(
                 // add points to the point collection
@@ -139,7 +139,7 @@ class MainActivity : AppCompatActivity() {
             SpatialReference.webMercator()
         )
 
-        // inner ring
+        // create a lake which is a polygon part and an iner ring to the above outer ring
         val innerLake = MutablePart.createWithPoints(
             listOf(
                 // add points to the point collection
@@ -152,14 +152,16 @@ class MainActivity : AppCompatActivity() {
             SpatialReference.webMercator()
         )
 
+        // add all the parts created above to a List
         var parts = listOf(island1, island2, outerIsland, innerLake)
 
+        // Create a PolygonBuilder using the list of parts created above
         var polygonBuilder = PolygonBuilder(parts)
 
-        //define a line symbol
+        // define a line symbol which will represent the boundary of the polygon
         val lineSymbol = SimpleLineSymbol(SimpleLineSymbolStyle.Solid, Color.blue, 2f)
 
-        // create and add a green graphic to show input polygon 2
+        // create and add a green graphic to fill color of the Polygon Builder.
         val greenFill = SimpleFillSymbol(SimpleFillSymbolStyle.Solid, Color.green, lineSymbol)
         graphicsOverlay.graphics.add(Graphic(polygonBuilder.toGeometry(), greenFill))
 
