@@ -1,6 +1,6 @@
 ext {
     // ArcGIS Maps SDK for Kotlin version
-    arcgisVersion = '200.1.0-3842'
+    arcgisVersion = '200.2.0-3850'
     // SDK versions
     compileSdkVersion = 33
     minSdkVersion = 26
@@ -27,7 +27,7 @@ ext {
     recyclerViewVersion = '1.1.0'
     androidBrowserVersion = '1.5.0'
     // Plugin versions
-    gradleVersion = '7.3.1'
+    gradleVersion = '8.0.0'
     // Java version
-    javaVersion = 1.11
+    javaVersion = 1.17
 }
