@@ -67,10 +67,10 @@ def parse_apis(apis_string: str) -> typing.List[str]:
     :param apis_string: A string containing all APIs.
     :return: A sorted list of stripped API names.
     """
-    apis = list(filter(bool, apis_string.splitlines()))
-    if not apis:
+    if apis := list(filter(bool, apis_string.splitlines())):
+        return sorted([api.lstrip('*- ').rstrip() for api in apis])
+    else:
         raise Exception('README Relevant API parse failure!')
-    return sorted([api.lstrip('*- ').rstrip() for api in apis])
 
 
 def parse_tags(tags_string: str) -> typing.List[str]:
@@ -80,10 +80,10 @@ def parse_tags(tags_string: str) -> typing.List[str]:
     :param tags_string: A string containing all tags, with comma as delimiter.
     :return: A sorted list of stripped tags.
     """
-    tags = tags_string.split(',')
-    if not tags:
+    if tags := tags_string.split(','):
+        return sorted([tag.strip() for tag in tags])
+    else:
         raise Exception('README Tags parse failure!')
-    return sorted([tag.strip() for tag in tags])
 
 def parse_provision_from(offline_data_string: str) -> typing.List[str]:
 
@@ -97,7 +97,7 @@ def parse_provision_to(offline_data_string: str) -> typing.List[str]:
 
     to_matches = re.findall("adb push (.*) /Android", offline_data_string)
     for i, match in enumerate(to_matches):
-        to_matches[i] = "/" + match
+        to_matches[i] = f"/{match}"
 
     return list(dict.fromkeys(to_matches))
 
@@ -145,16 +145,10 @@ class MetadataCreator:
 
         :return: A list of kotlin and java source code filenames.
         """
-        results = []
-
         paths = Path(self.folder_path).glob('**/*.java')
-        for path in paths:
-            results.append(os.path.relpath(path, self.folder_path))
-
+        results = [os.path.relpath(path, self.folder_path) for path in paths]
         paths = Path(self.folder_path).glob('**/*.kt')
-        for path in paths:
-            results.append(os.path.relpath(path, self.folder_path))
-
+        results.extend(os.path.relpath(path, self.folder_path) for path in paths)
         if not results:
             raise Exception('Unable to get kotlin or java source code paths.')
 
@@ -169,13 +163,14 @@ class MetadataCreator:
 
         :return: A list of image filenames.
         """
-        results = []
-        for file in os.listdir(self.folder_path):
-            if os.path.splitext(file)[1].lower() in ['.png']:
-                results.append(file)
-        if not results:
+        if results := [
+            file
+            for file in os.listdir(self.folder_path)
+            if os.path.splitext(file)[1].lower() in ['.png']
+        ]:
+            return sorted(results)
+        else:
             raise Exception('Unable to get images paths.')
-        return sorted(results)
 
     def populate_from_readme(self) -> None:
         """
@@ -236,14 +231,15 @@ class MetadataCreator:
         """
         Write the metadata to a json string.
         """
-        data = dict()
+        data = {
+            "category": self.category,
+            "description": self.description,
+            "formal_name": self.formal_name,
+            "ignore": self.ignore,
+            "images": self.images,
+            "keywords": self.keywords,
+        }
 
-        data["category"] = self.category
-        data["description"] = self.description
-        data["formal_name"] = self.formal_name
-        data["ignore"] = self.ignore
-        data["images"] = self.images
-        data["keywords"] = self.keywords
         if self.provision_from != False:
             data["provision_from"] = self.provision_from
             data["provision_to"] = self.provision_to
@@ -330,8 +326,11 @@ def all_samples(path: str):
         for dir_name in dirs:
             sample_path = os.path.join(root, dir_name)
             # Omit empty folders - they are omitted by Git.
-            if len([f for f in os.listdir(sample_path)
-                    if not f.startswith('.DS_Store')]) == 0:
+            if not [
+                f
+                for f in os.listdir(sample_path)
+                if not f.startswith('.DS_Store')
+            ]:
                 continue
             try:
                 compare_one_metadata(sample_path)

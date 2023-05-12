@@ -31,8 +31,7 @@ categories = {
 
 def run_mdl(readme_path: str):
     print("**** mdl ****")
-    code = sp.call(f'mdl --style /style.rb "{readme_path}"', shell=True)
-    return code
+    return sp.call(f'mdl --style /style.rb "{readme_path}"', shell=True)
 
 
 def run_style_check(dirname: str):
@@ -44,7 +43,7 @@ def run_style_check(dirname: str):
 
 
 def read_json(filenames_json_data):
-    return [filename for filename in filenames_json_data]
+    return list(filenames_json_data)
 
 
 def load_json_file(path: str):
@@ -84,16 +83,16 @@ def main():
     for f in files:
         if not os.path.exists(f):
             # The changed file is deleted, no need to style check.
-            print("file doesn't exist: " + f)
+            print(f"file doesn't exist: {f}")
             continue
-        
+
         # Get filename and folder name of the changed sample.
         filename = os.path.basename(f)
         dir_path = os.path.dirname(f)
         l_name = filename.lower()
 
         # Changed file is not a README or metadata file, omit.
-        if l_name != 'readme.md' and l_name != 'readme.metadata.json':
+        if l_name not in ['readme.md', 'readme.metadata.json']:
             continue
 
         # Print debug information for current sample.

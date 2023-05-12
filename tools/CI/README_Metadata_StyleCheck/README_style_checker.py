@@ -184,7 +184,7 @@ class ReadmeStyleChecker:
     def __init__(self, folder_path: str):
         self.folder_path = folder_path
         self.readme_path = os.path.join(folder_path, 'README.md')
-        print("folder path: " + folder_path)
+        print(f"folder path: {folder_path}")
         self.readme_contents = None
         self.readme_parts = None
         self.readme_headers = None
@@ -224,20 +224,16 @@ class ReadmeStyleChecker:
         """
         header_set = set(self.readme_headers)
         possible_header_set = set(self.possible_headers)
-        # Check if all sections are valid.
-        sets_diff = header_set - possible_header_set
-        if sets_diff:
+        if sets_diff := header_set - possible_header_set:
             raise Exception(
                 f'Error header - Unexpected header or extra whitespace'
                 f' - "{sets_diff}".')
-        # Check if all essential section headers present.
-        sets_diff = self.essential_headers - header_set
-        if sets_diff:
+        if sets_diff := self.essential_headers - header_set:
             raise Exception(
                 f'Error header - Missing essential header(s) - "{sets_diff}".')
-        # Check if all sections are in correct order.
-        index = check_is_subsequence(self.readme_headers, self.possible_headers)
-        if index:
+        if index := check_is_subsequence(
+            self.readme_headers, self.possible_headers
+        ):
             raise Exception(
                 f'Error header - Wrong order at - '
                 f'"{self.readme_headers[index-1]}".')
@@ -298,9 +294,9 @@ class ReadmeStyleChecker:
             api_set = check_apis(self.readme_parts[api_section_index])
             tag_set = check_tags(self.readme_parts[tags_section_index])
             if not api_set.isdisjoint(tag_set):
-                raise Exception(f'Error tags - API should not be in tags')
+                raise Exception('Error tags - API should not be in tags')
         except Exception as err:
-            raise Exception(f'Error checking extra tags due to previous error')
+            raise Exception('Error checking extra tags due to previous error')
 
 
 # region Main wrapper functions
@@ -358,8 +354,11 @@ def all_designs(path: str):
         for dir_name in dirs:
             sample_path = os.path.join(root, dir_name)
             # Omit empty folders - they are omitted by Git.
-            if len([f for f in os.listdir(sample_path)
-                    if not f.startswith('.DS_Store')]) == 0:
+            if not [
+                f
+                for f in os.listdir(sample_path)
+                if not f.startswith('.DS_Store')
+            ]:
                 continue
             exception_count = run_check(sample_path, exception_count)
 
